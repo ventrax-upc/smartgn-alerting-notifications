@@ -1,0 +1,13 @@
+environment:
+  name: prod
+
+spring:
+  jpa:
+    show-sql: false
+
+smartgn:
+  security:
+    enabled: true
+  notifications:
+    mode: live
+    dispatch-enabled: true
