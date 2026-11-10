@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:alerting;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+smartgn:
+  security:
+    enabled: false
+  notifications:
+    mode: simulated
+    dispatch-enabled: false
+    dispatch-interval-ms: 60000
+    batch-size: 10
+    timeout-seconds: 2
+  alerting:
+    seed-default-rules: false
