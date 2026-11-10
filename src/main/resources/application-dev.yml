@@ -1,0 +1,13 @@
+environment:
+  name: dev
+
+spring:
+  jpa:
+    show-sql: true
+
+smartgn:
+  security:
+    enabled: ${SECURITY_ENABLED:false}
+  notifications:
+    mode: ${NOTIFICATIONS_MODE:simulated}
+    dispatch-enabled: ${DISPATCH_ENABLED:true}

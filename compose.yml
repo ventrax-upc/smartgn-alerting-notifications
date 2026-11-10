@@ -1,0 +1,43 @@
+name: smartgn-alerting
+services:
+  db:
+    image: postgres:17.6
+    environment:
+      POSTGRES_DB: smartgn_alerting_db
+      POSTGRES_USER: smartgn_alerting
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+    ports: ["127.0.0.1:5436:5432"]
+    volumes: [alerting-db:/var/lib/postgresql/data]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U smartgn_alerting -d smartgn_alerting_db"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  alerting:
+    build: .
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/smartgn_alerting_db
+      DB_USERNAME: smartgn_alerting
+      DB_PASSWORD: ${DB_PASSWORD}
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:?Set service token}
+      SECURITY_ENABLED: ${SECURITY_ENABLED:-false}
+      NOTIFICATIONS_MODE: ${NOTIFICATIONS_MODE:-simulated}
+      DISPATCH_ENABLED: ${DISPATCH_ENABLED:-true}
+      DISPATCH_INTERVAL_MS: ${DISPATCH_INTERVAL_MS:-1000}
+      DISPATCH_BATCH_SIZE: ${DISPATCH_BATCH_SIZE:-50}
+      NOTIFICATION_TIMEOUT_SECONDS: ${NOTIFICATION_TIMEOUT_SECONDS:-2}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      SENDGRID_FROM: ${SENDGRID_FROM:-no-reply@smartgn.pe}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_FROM: ${TWILIO_FROM:-}
+      INFOBIP_BASE_URL: ${INFOBIP_BASE_URL:-https://api.infobip.com}
+      INFOBIP_API_KEY: ${INFOBIP_API_KEY:-}
+      INFOBIP_WHATSAPP_FROM: ${INFOBIP_WHATSAPP_FROM:-}
+    ports: ["127.0.0.1:8084:8084"]
+    depends_on:
+      db: {condition: service_healthy}
+
+volumes:
+  alerting-db:
