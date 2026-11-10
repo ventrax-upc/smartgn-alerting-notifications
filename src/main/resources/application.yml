@@ -1,0 +1,65 @@
+server:
+  port: ${PORT:8084}
+
+spring:
+  application:
+    name: alerting-notifications-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5436/smartgn_alerting_db}
+    username: ${DB_USERNAME:smartgn_alerting}
+    password: ${DB_PASSWORD:smartgn_alerting}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: com.ventrax.alerting.shared.infrastructure.persistence.jpa.strategy.SnakeCasePhysicalNamingStrategy
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+smartgn:
+  security:
+    enabled: ${SECURITY_ENABLED:false}
+    internal-token: ${INTERNAL_SERVICE_TOKEN:change-me-in-production-32-characters}
+    allowed-origin: ${ALLOWED_ORIGIN:http://localhost:4200}
+  notifications:
+    mode: ${NOTIFICATIONS_MODE:simulated}
+    dispatch-enabled: ${DISPATCH_ENABLED:true}
+    dispatch-interval-ms: ${DISPATCH_INTERVAL_MS:1000}
+    batch-size: ${DISPATCH_BATCH_SIZE:50}
+    timeout-seconds: ${NOTIFICATION_TIMEOUT_SECONDS:2}
+    sendgrid:
+      api-key: ${SENDGRID_API_KEY:}
+      from: ${SENDGRID_FROM:no-reply@smartgn.pe}
+    twilio:
+      account-sid: ${TWILIO_ACCOUNT_SID:}
+      auth-token: ${TWILIO_AUTH_TOKEN:}
+      from: ${TWILIO_FROM:}
+    infobip:
+      base-url: ${INFOBIP_BASE_URL:https://api.infobip.com}
+      api-key: ${INFOBIP_API_KEY:}
+      whatsapp-from: ${INFOBIP_WHATSAPP_FROM:}
+  alerting:
+    seed-default-rules: ${SEED_DEFAULT_RULES:true}
