@@ -102,7 +102,8 @@ public class AlertsController {
                 .body(resources);
     }
 
-    @Operation(summary = "Get an alert by id")
+    @Operation(summary = "Get an alert by id",
+            description = "Returns the alert details when the caller can access its account.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Alert found",
                     content = @Content(schema = @Schema(implementation = AlertResource.class))),
@@ -123,7 +124,8 @@ public class AlertsController {
         return ResponseEntityFromAlertQueryResultAssembler.toResponseEntityFromAlert(alert);
     }
 
-    @Operation(summary = "Acknowledge an alert")
+    @Operation(summary = "Acknowledge an alert",
+            description = "Records that the alert was reviewed and leaves it open for resolution.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Alert acknowledged",
                     content = @Content(schema = @Schema(implementation = AlertResource.class))),
@@ -148,7 +150,8 @@ public class AlertsController {
                 messageSource);
     }
 
-    @Operation(summary = "Resolve an alert")
+    @Operation(summary = "Resolve an alert",
+            description = "Closes an alert after the underlying condition has been addressed.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Alert resolved",
                     content = @Content(schema = @Schema(implementation = AlertResource.class))),
@@ -173,7 +176,8 @@ public class AlertsController {
                 messageSource);
     }
 
-    @Operation(summary = "List notifications for an alert")
+    @Operation(summary = "List notifications for an alert",
+            description = "Returns the delivery records linked to an alert the caller can access.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Notifications found",
                     content = @Content(array = @ArraySchema(

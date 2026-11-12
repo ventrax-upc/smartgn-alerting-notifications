@@ -71,7 +71,8 @@ public class NotificationsController {
                 .body(resources);
     }
 
-    @Operation(summary = "Get a notification by id")
+    @Operation(summary = "Get a notification by id",
+            description = "Returns the status and recipient of a notification visible to the caller.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Notification found",
                     content = @Content(schema = @Schema(implementation = NotificationResource.class))),
@@ -97,7 +98,8 @@ public class NotificationsController {
                 .toResponseEntityFromNotification(notification);
     }
 
-    @Operation(summary = "List delivery attempts for a notification")
+    @Operation(summary = "List delivery attempts for a notification",
+            description = "Returns recorded attempts and provider outcomes for a notification visible to the caller.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Attempts found",
                     content = @Content(array = @ArraySchema(

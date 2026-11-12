@@ -1,0 +1,25 @@
+{
+  "service": "alerting",
+  "version": 1,
+  "records": [
+    {
+      "type": "notificationPreference",
+      "alias": "demo-notification-preference-pro",
+      "accountAlias": "demo-account-pro",
+      "notificationType": "CRITICAL_ALERT",
+      "channel": "EMAIL",
+      "active": true
+    },
+    {
+      "type": "alertRule",
+      "alias": "demo-rule-low-pressure",
+      "name": "Demo low pressure",
+      "metric": "PRESSURE",
+      "operator": "LESS_THAN",
+      "threshold": 0.3,
+      "severity": "WARNING",
+      "description": "Creates an alert for demo readings below 0.3 kPa",
+      "active": true
+    }
+  ]
+}

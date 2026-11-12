@@ -10,8 +10,8 @@ RUN mkdir /data && chown 10001:10001 /data
 COPY tools/health.sh /app/health.sh
 COPY --from=build /workspace/target/*.jar app.jar
 ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=50 -XX:+ExitOnOutOfMemoryError"
-ENV PORT=8084
+ENV PORT=8086
 USER 10001:10001
-EXPOSE 8084
+EXPOSE 8086
 HEALTHCHECK --interval=10s --timeout=5s --start-period=40s CMD ["bash", "/app/health.sh"]
 ENTRYPOINT ["java","-jar","/app/app.jar"]

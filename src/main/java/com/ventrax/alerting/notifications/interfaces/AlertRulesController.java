@@ -46,7 +46,8 @@ public class AlertRulesController {
         this.messageSource = messageSource;
     }
 
-    @Operation(summary = "List alert rules")
+    @Operation(summary = "List alert rules",
+            description = "Lists rules used to evaluate telemetry, with an optional active-state filter.")
     @ApiResponse(responseCode = "200", description = "Rules found",
             content = @Content(array = @ArraySchema(
                     schema = @Schema(implementation = AlertRuleResource.class))))
@@ -57,7 +58,8 @@ public class AlertRulesController {
                 .toResponseEntityFromList(rules);
     }
 
-    @Operation(summary = "Get an alert rule by id")
+    @Operation(summary = "Get an alert rule by id",
+            description = "Returns the metric, threshold and severity configured for the requested rule.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Rule found",
                     content = @Content(schema = @Schema(implementation = AlertRuleResource.class))),
