@@ -1,23 +1,41 @@
 server:
-  port: ${PORT:8084}
+  port: ${PORT:8086}
 
 spring:
   application:
     name: alerting-notifications-service
+  config:
+    import: ${SPRING_CONFIG_IMPORT:optional:configserver:${SMARTGN_CONFIG_URL:http://config:8088}}
+  boot:
+    admin:
+      client:
+        url: ${SMARTGN_ADMIN_URL:http://admin:8089}
+        username: ${SMARTGN_ADMIN_USERNAME:smartgn}
+        password: ${SMARTGN_ADMIN_PASSWORD:}
+        instance:
+          service-url: ${ADMIN_SERVICE_URL:http://alerting:8086}
+          management-url: ${ADMIN_MANAGEMENT_URL:http://alerting:8086/actuator}
+          health-url: ${ADMIN_HEALTH_URL:http://alerting:8086/actuator/health}
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5436/smartgn_alerting_db}
     username: ${DB_USERNAME:smartgn_alerting}
     password: ${DB_PASSWORD:smartgn_alerting}
     driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+    schemas: alerting
+    default-schema: alerting
+    create-schemas: true
   jpa:
     open-in-view: false
     show-sql: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
       naming:
         physical-strategy: com.ventrax.alerting.shared.infrastructure.persistence.jpa.strategy.SnakeCasePhysicalNamingStrategy
     properties:
       hibernate:
+        default_schema: alerting
         format_sql: true
         jdbc:
           time_zone: UTC
@@ -33,7 +51,7 @@ management:
         include: health,info,metrics
   endpoint:
     health:
-      show-details: always
+      show-details: never
 
 springdoc:
   swagger-ui:
@@ -41,8 +59,8 @@ springdoc:
 
 smartgn:
   security:
-    enabled: ${SECURITY_ENABLED:false}
-    internal-token: ${INTERNAL_SERVICE_TOKEN:change-me-in-production-32-characters}
+    enabled: ${SECURITY_ENABLED:true}
+    internal-token: ${INTERNAL_SERVICE_TOKEN:}
     allowed-origin: ${ALLOWED_ORIGIN:http://localhost:4200}
   notifications:
     mode: ${NOTIFICATIONS_MODE:simulated}

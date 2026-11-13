@@ -1,6 +1,6 @@
 # Integración con smartgn-frontend
 
-Este documento resume el contrato que debe consumir el frontend y los puntos que requieren una decisión de arquitectura. El backend escucha en `http://localhost:8084`.
+Este documento resume el contrato que debe consumir el frontend y los puntos que requieren una decisión de arquitectura. El backend escucha en `http://localhost:8086`.
 
 ## 1. Base URL y proxy local
 
@@ -13,10 +13,10 @@ Para integrar alertas sin romper los demás módulos, usa un proxy por path. Las
 
 ```json
 {
-  "/api/v1/alert-rules": { "target": "http://localhost:8084", "secure": false },
-  "/api/v1/alerts": { "target": "http://localhost:8084", "secure": false },
-  "/api/v1/notifications": { "target": "http://localhost:8084", "secure": false },
-  "/api/v1/notification-preferences": { "target": "http://localhost:8084", "secure": false },
+  "/api/v1/alert-rules": { "target": "http://localhost:8086", "secure": false },
+  "/api/v1/alerts": { "target": "http://localhost:8086", "secure": false },
+  "/api/v1/notifications": { "target": "http://localhost:8086", "secure": false },
+  "/api/v1/notification-preferences": { "target": "http://localhost:8086", "secure": false },
   "/api/v1": { "target": "http://localhost:3000", "secure": false }
 }
 ```

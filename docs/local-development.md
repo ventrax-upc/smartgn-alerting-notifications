@@ -54,10 +54,10 @@ $env:NOTIFICATIONS_MODE='simulated'
 .\mvnw.cmd spring-boot:run
 ```
 
-- API: `http://localhost:8084`
-- Swagger UI: `http://localhost:8084/swagger-ui.html`
-- OpenAPI: `http://localhost:8084/v3/api-docs`
-- Health: `http://localhost:8084/actuator/health`
+- API: `http://localhost:8086`
+- Swagger UI: `http://localhost:8086/swagger-ui.html`
+- OpenAPI: `http://localhost:8086/v3/api-docs`
+- Health: `http://localhost:8086/actuator/health`
 
 ## 4. Prueba manual del flujo
 
@@ -74,7 +74,7 @@ $rule = @{
   active=$true
 } | ConvertTo-Json
 
-Invoke-RestMethod -Method Post -Uri http://localhost:8084/api/v1/alert-rules `
+Invoke-RestMethod -Method Post -Uri http://localhost:8086/api/v1/alert-rules `
   -ContentType 'application/json' -Body $rule
 
 $pref = @{
@@ -85,7 +85,7 @@ $pref = @{
   active=$true
 } | ConvertTo-Json
 
-Invoke-RestMethod -Method Put -Uri http://localhost:8084/api/v1/notification-preferences `
+Invoke-RestMethod -Method Put -Uri http://localhost:8086/api/v1/notification-preferences `
   -ContentType 'application/json' -Body $pref
 ```
 
@@ -102,15 +102,15 @@ $event = @{
   pressureKpa=0.4
 } | ConvertTo-Json
 
-Invoke-RestMethod -Method Post -Uri http://localhost:8084/internal/v1/telemetry-events `
+Invoke-RestMethod -Method Post -Uri http://localhost:8086/internal/v1/telemetry-events `
   -ContentType 'application/json' -Body $event
 ```
 
 Consulte el resultado:
 
 ```powershell
-Invoke-RestMethod http://localhost:8084/api/v1/alerts
-Invoke-RestMethod http://localhost:8084/api/v1/notifications
+Invoke-RestMethod http://localhost:8086/api/v1/alerts
+Invoke-RestMethod http://localhost:8086/api/v1/notifications
 ```
 
 El scheduler despacha cada segundo. En modo simulado la notificación pasa a `ACCEPTED` con un id `sim-<uuid>`.
@@ -131,7 +131,7 @@ $headers = @{
   'X-Account-Id'='11111111-1111-1111-1111-111111111111'
   'X-Role'='USER'
 }
-Invoke-RestMethod -Headers $headers http://localhost:8084/api/v1/alerts
+Invoke-RestMethod -Headers $headers http://localhost:8086/api/v1/alerts
 ```
 
 Rutas internas:
@@ -139,7 +139,7 @@ Rutas internas:
 ```powershell
 $internal = @{ Authorization='Bearer local-internal-token' }
 Invoke-RestMethod -Headers $internal -Method Post `
-  -Uri http://localhost:8084/internal/v1/telemetry-events `
+  -Uri http://localhost:8086/internal/v1/telemetry-events `
   -ContentType 'application/json' -Body $event
 ```
 
@@ -147,7 +147,7 @@ Invoke-RestMethod -Headers $internal -Method Post `
 
 | Variable | Default | Descripción |
 | --- | --- | --- |
-| `PORT` | `8084` | Puerto HTTP. |
+| `PORT` | `8086` | Puerto HTTP. |
 | `DB_URL` | `jdbc:postgresql://localhost:5436/smartgn_alerting_db` | URL JDBC. |
 | `DB_USERNAME` | `smartgn_alerting` | Usuario. |
 | `DB_PASSWORD` | `smartgn_alerting` | Contraseña. |

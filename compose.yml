@@ -17,7 +17,7 @@ services:
   alerting:
     build: .
     environment:
-      DB_URL: jdbc:postgresql://db:5432/smartgn_alerting_db
+      DB_URL: jdbc:postgresql://db:5432/smartgn_alerting_db?currentSchema=alerting
       DB_USERNAME: smartgn_alerting
       DB_PASSWORD: ${DB_PASSWORD}
       INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:?Set service token}
@@ -35,7 +35,7 @@ services:
       INFOBIP_BASE_URL: ${INFOBIP_BASE_URL:-https://api.infobip.com}
       INFOBIP_API_KEY: ${INFOBIP_API_KEY:-}
       INFOBIP_WHATSAPP_FROM: ${INFOBIP_WHATSAPP_FROM:-}
-    ports: ["127.0.0.1:8084:8084"]
+    ports: ["127.0.0.1:8086:8086"]
     depends_on:
       db: {condition: service_healthy}
 

@@ -1,6 +1,6 @@
 # Contratos REST e integración
 
-Base local: `http://localhost:8084`.
+Base local: `http://localhost:8086`.
 
 El documento OpenAPI generado desde la aplicación está en [`docs/openapi.json`](openapi.json). También se expone en `/v3/api-docs` y `/swagger-ui.html`.
 
