@@ -18,11 +18,15 @@ import com.ventrax.alerting.notifications.infrastructure.persistence.jpa.reposit
 import com.ventrax.alerting.notifications.infrastructure.persistence.jpa.repositories.NotificationRepository;
 import com.ventrax.alerting.shared.application.result.Result;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,16 +35,19 @@ import java.util.List;
 @Transactional
 public class AlertCommandServiceImpl implements AlertCommandService {
 
+    private final JdbcTemplate jdbc;
     private final AlertRepository alertRepository;
     private final AlertRuleRepository alertRuleRepository;
     private final NotificationRepository notificationRepository;
     private final NotificationPreferenceRepository notificationPreferenceRepository;
 
     public AlertCommandServiceImpl(
+            JdbcTemplate jdbc,
             AlertRepository alertRepository,
             AlertRuleRepository alertRuleRepository,
             NotificationRepository notificationRepository,
             NotificationPreferenceRepository notificationPreferenceRepository) {
+        this.jdbc = jdbc;
         this.alertRepository = alertRepository;
         this.alertRuleRepository = alertRuleRepository;
         this.notificationRepository = notificationRepository;
@@ -50,41 +57,58 @@ public class AlertCommandServiceImpl implements AlertCommandService {
     @Override
     public Result<List<Alert>, AlertCommandFailure> handle(EvaluateTelemetryCommand command) {
         var reading = command.reading();
-        if (!reading.hasAnyMetric()) {
-            return Result.failure(new AlertCommandFailure.Invalid("alert.error.metric.missing"));
-        }
         if (command.measuredAt().isAfter(Instant.now().plus(Duration.ofMinutes(5)))) {
             return Result.failure(new AlertCommandFailure.Invalid("alert.error.measuredAt.invalid"));
         }
 
+        var device = command.deviceId().value();
+        var event = command.eventId().value();
+        if (jdbc.update("""
+                INSERT INTO alerting.telemetry_receipt (device_id, event_id) VALUES (?, ?)
+                ON CONFLICT DO NOTHING
+                """, device, event) == 0) {
+            return Result.success(List.of());
+        }
+
+        var measuredAt = command.measuredAt().truncatedTo(ChronoUnit.MICROS).atOffset(ZoneOffset.UTC);
+        jdbc.update("""
+                INSERT INTO alerting.telemetry_watermark (device_id, measured_at) VALUES (?, ?)
+                ON CONFLICT DO NOTHING
+                """, device, measuredAt);
+        var latest = jdbc.queryForObject("""
+                SELECT measured_at FROM alerting.telemetry_watermark WHERE device_id = ? FOR UPDATE
+                """, (row, index) -> row.getObject(1, OffsetDateTime.class), device);
+        if (measuredAt.isAfter(latest)) {
+            jdbc.update("UPDATE alerting.telemetry_watermark SET measured_at = ? WHERE device_id = ?",
+                    measuredAt, device);
+        }
+        var historical = measuredAt.isBefore(latest)
+                || command.measuredAt().isBefore(Instant.now().minusSeconds(30));
+
         var rules = alertRuleRepository.findAllByActiveTrueOrderByNameAsc();
         var created = new ArrayList<Alert>();
-        try {
-            for (var rule : rules) {
-                if (!rule.matches(reading)) {
-                    continue;
-                }
-                if (alertRepository.existsByDeviceIdAndEventIdAndRuleId(
-                        command.deviceId(), command.eventId(), rule.getId())) {
-                    log.debug("Duplicate alert ignored for event {} and rule {}",
-                            command.eventId().value(), rule.getId());
-                    continue;
-                }
-                var measured = reading.valueFor(rule.getMetric());
-                var condition = rule.describeCondition(measured);
-                var instructions = AlertGuidanceCatalog.instructionsFor(
-                        rule.getMetric(), rule.getSeverity());
-                var alert = alertRepository.saveAndFlush(
-                        new Alert(command, rule, measured, condition, instructions));
-                createNotificationIfPossible(alert, command);
-                created.add(alert);
+        for (var rule : rules) {
+            if (!rule.matches(reading) || alertRepository.existsByDeviceIdAndEventIdAndRuleId(
+                    command.deviceId(), command.eventId(), rule.getId())) {
+                continue;
             }
-            log.info("Telemetry event {} evaluated against {} rules, {} alerts created",
-                    command.eventId().value(), rules.size(), created.size());
-            return Result.success(created);
-        } catch (IllegalArgumentException exception) {
-            return Result.failure(new AlertCommandFailure.Invalid(exception.getMessage()));
+
+            var measured = reading.valueFor(rule.getMetric());
+            var condition = rule.describeCondition(measured);
+            var instructions = AlertGuidanceCatalog.instructionsFor(rule.getMetric(), rule.getSeverity());
+            var alert = new Alert(command, rule, measured, condition, instructions);
+            if (historical) {
+                alert.resolve();
+            }
+            alertRepository.saveAndFlush(alert);
+            if (!historical) {
+                createNotificationIfPossible(alert, command);
+            }
+            created.add(alert);
         }
+        log.info("Telemetry device {} event {} evaluated against {} rules, {} alerts created, historical {}",
+                device, event, rules.size(), created.size(), historical);
+        return Result.success(created);
     }
 
     @Override

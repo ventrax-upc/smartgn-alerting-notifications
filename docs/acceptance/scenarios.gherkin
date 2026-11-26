@@ -1,0 +1,19 @@
+# Source: Ventrax AV4 report. Acceptance specification; execution is verified separately.
+Feature: Safety alerts and notifications
+
+  Scenario: Generate an alert from a critical gas reading
+    Given an active rule for a gas safety metric
+    And an authorized telemetry event matches the rule condition
+    When the event is processed by Alerting
+    Then an alert is created with the corresponding severity
+    And a notification is prepared using the account preferences
+
+  Scenario: Avoid duplicate alerts for the same event
+    Given an alert exists for a device, eventId and rule
+    When the same event is processed again
+    Then no additional alert or notification is created
+
+  Scenario: Acknowledge an open alert
+    Given an alert has status OPEN
+    When an authorized user acknowledges the alert
+    Then its status becomes ACKNOWLEDGED

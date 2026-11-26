@@ -6,6 +6,7 @@ import com.ventrax.alerting.notifications.domain.model.commands.CreateAlertRuleC
 import com.ventrax.alerting.notifications.domain.model.commands.UpdateNotificationPreferenceCommand;
 import com.ventrax.alerting.notifications.domain.model.valueobjects.AccountId;
 import com.ventrax.alerting.notifications.domain.model.valueobjects.AlertSeverity;
+import com.ventrax.alerting.notifications.domain.model.valueobjects.AlertStatus;
 import com.ventrax.alerting.notifications.domain.model.valueobjects.DeliveryStatus;
 import com.ventrax.alerting.notifications.domain.model.valueobjects.NotificationChannel;
 import com.ventrax.alerting.notifications.domain.model.valueobjects.NotificationType;
@@ -128,8 +129,33 @@ class TelemetryAlertFlowIntegrationTest {
         assertEquals(1, notificationRepository.count());
     }
 
+    @Test
+    void storesOutOfOrderAlertAsHistoryWithoutCreatingAnotherNotification() throws Exception {
+        var propertyId = UUID.randomUUID();
+        var supplyPointId = UUID.randomUUID();
+        var measured = Instant.now();
+        for (var entry : List.of(
+                telemetryBody(propertyId, supplyPointId, "evt-current", "dev-history", measured),
+                telemetryBody(propertyId, supplyPointId, "evt-history", "dev-history", measured.minusSeconds(5)))) {
+            mockMvc.perform(post("/internal/v1/telemetry-events")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(entry))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.alertsCreated").value(1));
+        }
+        var alerts = alertRepository.findAll();
+        assertEquals(2, alerts.size());
+        assertEquals(1, alerts.stream().filter(alert -> alert.getStatus() == AlertStatus.OPEN).count());
+        assertEquals(1, alerts.stream().filter(alert -> alert.getStatus() == AlertStatus.RESOLVED).count());
+        assertEquals(1, notificationRepository.count());
+    }
+
+    private String telemetryBody(UUID propertyId, UUID supplyPointId, String eventId, String deviceId) {
+        return telemetryBody(propertyId, supplyPointId, eventId, deviceId, Instant.now());
+    }
+
     private String telemetryBody(
-            UUID propertyId, UUID supplyPointId, String eventId, String deviceId) {
+            UUID propertyId, UUID supplyPointId, String eventId, String deviceId, Instant timestamp) {
         return """
                 {
                   "eventId": "%s",
@@ -140,7 +166,7 @@ class TelemetryAlertFlowIntegrationTest {
                   "measuredAt": "%s",
                   "gasPresence": true
                 }
-                """.formatted(eventId, deviceId, propertyId, supplyPointId, ACCOUNT, Instant.now());
+                """.formatted(eventId, deviceId, propertyId, supplyPointId, ACCOUNT, timestamp);
     }
 
     @Test

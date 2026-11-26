@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Internal telemetry", description = "Normalized telemetry events consumed from the broker")
+@Tag(name = "Internal telemetry", description = "Normalized telemetry events delivered over internal HTTP by the durable Telemetry outbox")
 @RestController
 @RequestMapping("/internal/v1/telemetry-events")
 public class InternalTelemetryEventsController {

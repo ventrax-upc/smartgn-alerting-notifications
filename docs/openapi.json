@@ -25,7 +25,7 @@
     },
     {
       "name": "Internal telemetry",
-      "description": "Normalized telemetry events consumed from the broker"
+      "description": "Normalized telemetry events delivered over internal HTTP by the durable Telemetry outbox"
     },
     {
       "name": "Notification preferences",

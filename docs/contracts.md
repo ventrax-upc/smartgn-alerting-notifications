@@ -339,3 +339,7 @@ Respuesta `200` con la notificación actualizada. `404` si el `providerMessageId
 | Fallo permanente | `FAILED` | No |
 | Indeterminado | `INDETERMINATE` | No |
 | Circuito abierto | `PENDING` | 30 s |
+
+## Delivery of telemetry
+
+Telemetry & Data Ingestion delivers `TelemetryProcessed` with the internal service bearer token over HTTP. Alerting commits a receipt keyed by device and event in the same transaction as evaluation, alerts and notification intents. A repeated delivery returns a successful evaluation with zero new alerts. The existing alert unique key also includes the rule ID. A reading older than the device watermark or more than 30 seconds old at evaluation can produce a resolved historical alert without another notification intent. That evaluation never closes a previously opened alert.
