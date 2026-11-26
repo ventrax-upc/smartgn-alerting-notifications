@@ -8,6 +8,8 @@ Evaluates telemetry against alert rules and manages alert acknowledgment and res
 
 ## Run locally
 
+The [integrated startup guide](https://github.com/ventrax-upc/smartgn-api-gateway/blob/develop/README.md#start-all-13-repositories-locally) covers all 13 repositories. The commands below describe this component.
+
 Requirements are Docker Desktop with the Linux engine and PowerShell 7. Keep the SmartGN repositories as siblings for the integrated stack.
 
 ```powershell
@@ -29,9 +31,11 @@ Standalone settings use the variables in `.env.example`. Copy it to an ignored `
 ## Verification
 
 ```powershell
-./mvnw.cmd test
+./scripts/test.ps1
 ./scripts/smoke-local.ps1
 ```
+
+The test script runs Flyway and the integration suite against disposable PostgreSQL.
 
 Run the integrated smoke from the Gateway repository to verify cross-service workflows.
 
@@ -52,6 +56,10 @@ Run the integrated smoke from the Gateway repository to verify cross-service wor
 - [OpenAPI export](docs/openapi.json)
 - [Frontend integration](docs/frontend-integration.md)
 - [Service overview](docs/service-overview.md)
+
+## Acceptance scenarios
+
+See the [Gherkin acceptance scenarios](docs/acceptance/scenarios.gherkin). These are acceptance specifications. Use the verification commands above to run the automated checks.
 
 ## License
 

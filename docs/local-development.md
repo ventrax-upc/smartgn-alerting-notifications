@@ -11,10 +11,10 @@
 ```powershell
 $env:JAVA_HOME='C:\Users\HP\.jdks\openjdk-26.0.1'
 $env:Path="$env:JAVA_HOME\bin;$env:Path"
-.\mvnw.cmd -B test
+.\scripts\test.ps1
 ```
 
-Las pruebas usan H2 en memoria con `MODE=PostgreSQL`, `ddl-auto=create-drop`, scheduler desactivado y seeder desactivado. No requieren PostgreSQL.
+El script usa Docker para levantar un PostgreSQL desechable y aplicar las migraciones Flyway. Las pruebas desactivan el scheduler y el seeder.
 
 Para empaquetar:
 
